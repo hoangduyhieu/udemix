@@ -356,7 +356,7 @@ def main():
 
         if args.concurrent > 25:
             logger.warning("The maximum number of concurrent downloads is 25. The provided number of concurrent downloads will be capped to 25.")
-            max_concurrent_lectures = 700
+            max_concurrent_lectures = 25
         elif args.concurrent < 1:
             logger.warning("The minimum number of concurrent downloads is 1. The provided number of concurrent downloads will be capped to 1.")
             max_concurrent_lectures = 1
