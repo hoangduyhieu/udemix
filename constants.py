@@ -8,6 +8,9 @@ from shutil import get_terminal_size
 from threading import Thread
 from rich.progress import TextColumn
 
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 COURSE_URL = "https://udemy.com/api-2.0/courses/{course_id}/"
 CURRICULUM_URL = "https://udemy.com/api-2.0/courses/{course_id}/subscriber-curriculum-items/?page_size=200&fields[lecture]=title,object_index,is_published,sort_order,created,asset,supplementary_assets,is_free&fields[quiz]=title,object_index,is_published,sort_order,type&fields[practice]=title,object_index,is_published,sort_order&fields[chapter]=title,object_index,is_published,sort_order&fields[asset]=title,filename,asset_type,status,time_estimation,is_external&caching_intent=True"
 LECTURE_URL = "https://www.udemy.com/api-2.0/users/me/subscribed-courses/{course_id}/lectures/{lecture_id}?fields[lecture]=asset,description,download_url,is_free,last_watched_second&fields[asset]=asset_type,media_sources,captions"
@@ -87,7 +90,8 @@ class Loader:
     def stop(self):
         self.done = True
         # Clear the spinner line
-        cols = os.get_terminal_size().columns
+        import shutil
+        cols = shutil.get_terminal_size(fallback=(80, 20)).columns
         print("\r" + " " * cols, end="", flush=True)
         print("\r", end="", flush=True)
 
