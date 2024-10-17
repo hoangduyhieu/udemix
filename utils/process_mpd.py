@@ -73,7 +73,7 @@ def process_mpd(mpd_file_path, download_folder_path, output_file_name, length, k
     output_path = os.path.join(os.path.dirname(download_folder_path), output_file_name)
 
     ffmpeg_command = (
-        f"ffmpeg -i \"{video_path}\" -i \"{audio_path}\" -c:v copy -c:a aac -y "
+        f"ffmpeg -loglevel panic -i \"{video_path}\" -i \"{audio_path}\" -c:v copy -c:a aac -y "
         f"\"{output_path}.mp4\""
     )
 
