@@ -26,6 +26,27 @@ from utils.process_mp4 import download_mp4
 
 console = Console()
 
+def parse_chapter_filter(chapter_str):
+    """
+    Given a string like "1,3-5,7,9-11", return a set of chapter numbers.
+    """
+    chapters = set()
+    for part in chapter_str.split(','):
+        if '-' in part:
+            try:
+                start, end = part.split('-')
+                start = int(start.strip())
+                end = int(end.strip())
+                chapters.update(range(start, end + 1))
+            except ValueError:
+                logger.error("Invalid range in --chapter argument: %s", part)
+        else:
+            try:
+                chapters.add(int(part.strip()))
+            except ValueError:
+                logger.error("Invalid chapter number in --chapter argument: %s", part)
+    return chapters
+
 class Udemy:
     def __init__(self):
         global cookie_jar
@@ -233,7 +254,7 @@ class Udemy:
                 f"{lindex:02}" if lindex < 10 else f"{lindex}", 
                 lecture)
                 for mindex, chapter in enumerate(curriculum, start=1)
-                if is_valid_chapter(mindex, start_chapter, end_chapter)
+                if is_valid_chapter(mindex, start_chapter, end_chapter, chapter_filter)
                 for lindex, lecture in enumerate(chapter['children'], start=1)
                 if is_valid_lecture(mindex, lindex, start_chapter, start_lecture, end_chapter, end_lecture)
             )
@@ -318,7 +339,7 @@ def check_prerequisites():
 def main():
 
     try:
-        global course_url, key, cookie_path, COURSE_DIR, captions, max_concurrent_lectures, skip_captions, skip_assets, skip_lectures, skip_articles, skip_assignments, convert_to_srt, start_chapter, end_chapter, start_lecture, end_lecture
+        global course_url, key, cookie_path, COURSE_DIR, captions, max_concurrent_lectures, skip_captions, skip_assets, skip_lectures, skip_articles, skip_assignments, convert_to_srt, start_chapter, end_chapter, start_lecture, end_lecture, chapter_filter
 
         parser = argparse.ArgumentParser(description="Udemy Course Downloader")
         parser.add_argument("--id", "-i", type=int, required=False, help="The ID of the Udemy course to download")
@@ -345,6 +366,8 @@ def main():
         parser.add_argument("--skip-articles", type=bool, default=False, help="Skip downloading articles", action=LoadAction, nargs='?')
         parser.add_argument("--skip-assignments", type=bool, default=False, help="Skip downloading assignments", action=LoadAction, nargs='?')
         
+        parser.add_argument("--chapter", type=str, help="Download specific chapters. Use comma separated values and ranges (e.g., '1,3-5,7,9-11').")
+
         args = parser.parse_args()
 
         if len(sys.argv) == 1:
@@ -495,6 +518,11 @@ def main():
         else:
             end_chapter = len(course_curriculum)
             end_lecture = 1000
+
+        chapter_filter = None
+        if args.chapter:
+            chapter_filter = parse_chapter_filter(args.chapter)
+            logger.info("Chapter filter applied: %s", sorted(chapter_filter))
 
         logger.info("The course download is starting. Please wait while the materials are being downloaded.")
 
