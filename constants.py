@@ -148,8 +148,13 @@ def format_time(seconds):
     minutes, seconds = divmod(remainder, 60)
     return f"{hours}hr {minutes}min {seconds}s" if hours > 0 else f"{minutes}min {seconds}s"
 
-def is_valid_chapter(mindex, start_chapter, end_chapter):
-    return start_chapter <= mindex <= end_chapter
+def is_valid_chapter(mindex, start_chapter, end_chapter, chapter_filter=None):
+    """
+    Check if a chapter is valid based on range constraints and optional chapter filter
+    """
+    range_valid = start_chapter <= mindex <= end_chapter
+    filter_valid = chapter_filter is None or mindex in chapter_filter
+    return range_valid and filter_valid
 
 def is_valid_lecture(mindex, lindex, start_chapter, start_lecture, end_chapter, end_lecture):
     if mindex == start_chapter and lindex < start_lecture:
